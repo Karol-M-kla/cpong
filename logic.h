@@ -25,6 +25,7 @@ typedef struct {
 
 void initGame(gameState *currentGameState);
 void moveObjects(gameState *currentGameState);
+bool checkPaddleCollision(gameState *currentGameState, int player);
 void detectCollision(gameState *currentGameState);
 
 #endif // LOGIC_H
