@@ -2,10 +2,11 @@
 #define LOGIC_H
 
 #include <SDL3/SDL.h>
+#include <stdint.h>
 #include "parameters.h"
 
 typedef struct {
-  Sint8 score;
+  int8_t score;
   bool isRightPlayer;
   SDL_FRect paddle;
   float velocityY;
@@ -24,5 +25,6 @@ typedef struct {
 
 void initGame(gameState *currentGameState);
 void moveObjects(gameState *currentGameState);
+void detectCollision(gameState *currentGameState);
 
 #endif // LOGIC_H

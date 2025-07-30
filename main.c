@@ -40,6 +40,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   }
 
   initGame(&currentGameState);
+
   return SDL_APP_CONTINUE; /* carry on with the program! */
 }
 
@@ -71,6 +72,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   /* put the newly-cleared rendering on the screen. */
   SDL_RenderPresent(renderer);
 
+  detectCollision(&currentGameState);
   moveObjects(&currentGameState);
 
   return SDL_APP_CONTINUE; /* carry on with the program! */
