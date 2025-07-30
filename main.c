@@ -55,11 +55,21 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
     if (event->key.key == SDLK_K || event->key.key == SDLK_UP) {
       currentGameState.players[1].velocityY = -PLAYER_VELOCITY_DELTA;
     }
+
+
+		// right player 
+    if (event->key.key == SDLK_J || event->key.key == SDLK_DOWN) {
+      currentGameState.players[0].velocityY = PLAYER_VELOCITY_DELTA;
+    }
+    if (event->key.key == SDLK_K || event->key.key == SDLK_UP) {
+      currentGameState.players[0].velocityY = -PLAYER_VELOCITY_DELTA;
+    }
   }
   if (event->type == SDL_EVENT_KEY_UP) {
     if (event->key.key == SDLK_J || event->key.key == SDLK_DOWN ||
         event->key.key == SDLK_K || event->key.key == SDLK_UP) {
       currentGameState.players[1].velocityY = 0;
+      currentGameState.players[0].velocityY = 0;
     }
   }
 

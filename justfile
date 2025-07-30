@@ -1,2 +1,2 @@
 build:
-	gcc -g -Wextra -o main main.c logic.c -lSDL3 -fopenmp
+	gcc -g -Wextra -o main main.c logic.c -lm -lSDL3 -fopenmp

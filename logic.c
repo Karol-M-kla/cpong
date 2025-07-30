@@ -1,15 +1,16 @@
 #include "logic.h"
+#include "parameters.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_rect.h>
+// #include <math.h>
 #include <omp.h>
 #include <stdio.h>
 
 void ballReset(gameState *currentGameState) {
   // TODO: add random direction
 
-  currentGameState->ball.velocityX = 0.001;
-  // currentGameState->ball.velocityY = 0.001;
-  BALL_SIZE;
+  currentGameState->ball.velocityX = BALL_SPEED;
+  currentGameState->ball.velocityY = BALL_SPEED;
   currentGameState->ball.ballRect.x = WINDOW_WIDTH / 2.;
   currentGameState->ball.ballRect.y = WINDOW_HEIGHT / 2.;
 }
@@ -21,10 +22,10 @@ void initGame(gameState *currentGameState) {
   // currentGameState->players[0].velocityY = 0.0;
   // currentGameState->players[1].velocityY = -0.0;
 
-  currentGameState->players[0].paddle.x = (WINDOW_WIDTH / 2.) - 300;
-  currentGameState->players[1].paddle.x =
-      (WINDOW_WIDTH / 2.) + 300 - PADDLE_WIDTH;
+  currentGameState->players[0].paddle.x = PADDLE_WIDTH;
+  currentGameState->players[1].paddle.x = WINDOW_WIDTH - 2*PADDLE_WIDTH;
   for (int i = 0; i < 2; i++) {
+		currentGameState->players[i].score = 0;
     currentGameState->players[i].paddle.y = WINDOW_HEIGHT / 2.;
     currentGameState->players[i].paddle.h = PADDLE_HEIGHT;
     currentGameState->players[i].paddle.w = PADDLE_WIDTH;
@@ -37,9 +38,9 @@ void moveObjects(gameState *currentGameState) {
 #pragma omp parallel for
     for (int i = 0; i < 2; i++) {
       float *playerPaddleY = &currentGameState->players[i].paddle.y;
+
       if (*playerPaddleY - PLAYER_VELOCITY_DELTA < 0) {
         *playerPaddleY = 0;
-
       } else if (*playerPaddleY + PADDLE_HEIGHT + PLAYER_VELOCITY_DELTA >
                  WINDOW_HEIGHT) {
         *playerPaddleY = WINDOW_HEIGHT - PADDLE_HEIGHT;
@@ -52,6 +53,60 @@ void moveObjects(gameState *currentGameState) {
   }
 }
 
+float computeBounceAngle(float paddleY, float ballY) {
+  float paddleCenter = (paddleY + PADDLE_HEIGHT) / 2.0;
+  float ballCenter = (ballY + BALL_SIZE) / 2.0;
+  float relativeBallBoucePoint = ballCenter - paddleCenter;
+  float normalizedRBBP = relativeBallBoucePoint / PADDLE_HEIGHT / 2.0;
+
+  float angleTreshold = 0.95;
+
+  if (normalizedRBBP < -angleTreshold) {
+    return -angleTreshold;
+  } else if (normalizedRBBP > angleTreshold) {
+    return angleTreshold;
+  }
+  return normalizedRBBP;
+}
+
+void bounceBall(gameState *currentGameState, int player) {
+
+  float *ballXvelocity = &currentGameState->ball.velocityX;
+  float *ballYvelocity = &currentGameState->ball.velocityY;
+  float *ballXValue = &currentGameState->ball.ballRect.x;
+  float playerPaddleXValue = currentGameState->players[player].paddle.x;
+
+  // normalized relative ball bounce point
+  float normalizedRBPP =
+      computeBounceAngle(currentGameState->players[player].paddle.y,
+                         currentGameState->ball.ballRect.y);
+
+  float possibleYFactor = 1.0 - (normalizedRBPP * normalizedRBPP);
+  // float possibleYFactor = 1.0 - powf(normalizedRBPP, 2.0);
+  // float possibleYFactor = 0.5;
+  float yFactor = possibleYFactor > 0.0 ? possibleYFactor : 0.0;
+  fprintf(stdout, "y factor: %f\n", yFactor);
+  switch (player) {
+  case 0:
+    // *ballXvelocity = fabs(normalizedRBPP) * BALL_SPEED;
+    *ballXvelocity = BALL_SPEED;
+    *ballYvelocity = *ballYvelocity >= 0.0 ? yFactor : -yFactor;
+    *ballYvelocity *= BALL_SPEED;
+    *ballXValue = playerPaddleXValue + PADDLE_WIDTH + 0.02;
+    break;
+  case 1:
+    // *ballXvelocity = -fabs(normalizedRBPP) * BALL_SPEED;
+    *ballXvelocity = -BALL_SPEED;
+    *ballYvelocity = *ballYvelocity >= 0.0 ? yFactor : -yFactor;
+    *ballYvelocity *= BALL_SPEED;
+    *ballXValue = playerPaddleXValue - BALL_SIZE - 0.02;
+    break;
+  default:
+    fprintf(stderr, "Wrong player id %d\n", player);
+    break;
+  }
+}
+
 bool checkPaddleCollision(gameState *currentGameState, int player) {
   SDL_FRect ballHitbox = currentGameState->ball.ballRect;
   SDL_FRect playerPaddleHitbox = currentGameState->players[player].paddle;
@@ -59,7 +114,7 @@ bool checkPaddleCollision(gameState *currentGameState, int player) {
       (ballHitbox.x + BALL_SIZE > playerPaddleHitbox.x) &&
       (ballHitbox.y < playerPaddleHitbox.y + PADDLE_HEIGHT) &&
       (ballHitbox.y + BALL_SIZE > playerPaddleHitbox.y)) {
-    printf("hey %d\n", player);
+    // printf("hey %d\n", player);
     return true;
   } else {
     return false;
@@ -77,13 +132,19 @@ void detectCollision(gameState *currentGameState) {
       *ballYvelocity = -(*ballYvelocity);
     }
 
-    if (ballXValue < 0 || ballXValue + BALL_SIZE > WINDOW_WIDTH) {
-      *ballXvelocity = -(*ballXvelocity);
+    if (ballXValue < 0) {
+      currentGameState->players[1].score++;
+      ballReset(currentGameState);
+    }
+    if (ballXValue + BALL_SIZE > WINDOW_WIDTH) {
+      currentGameState->players[0].score++;
+      ballReset(currentGameState);
     }
 #pragma omp parallel for
     for (int i = 0; i < 2; i++) {
       if (checkPaddleCollision(currentGameState, i)) {
-        *ballXvelocity = -(*ballXvelocity);
+        // *ballXvelocity = -(*ballXvelocity);
+        bounceBall(currentGameState, i);
       }
     }
   }
