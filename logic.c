@@ -78,7 +78,6 @@ float computeBounceAngle(float paddleY, float ballY) {
   float ballCenterY = objectCenterY(ballY, BALL_SIZE);
   float relativeBallBoucePoint = ballCenterY - paddleCenterY;
   float normalizedRBBP = relativeBallBoucePoint / PADDLE_HEIGHT / 2.0;
-  // float normalizedRBBP = relativeBallBoucePoint / PADDLE_HEIGHT;
 
   float angleTreshold = 0.95;
 
@@ -142,34 +141,31 @@ void detectCollision(gameState *currentGameState) {
   float ballSpeed = currentGameState->ball.speed;
   float *ballXvelocity = &currentGameState->ball.velocityX;
   float *ballYvelocity = &currentGameState->ball.velocityY;
-// #pragma omp parallel
-//   {
-    // ball collision for UP and DOWN
-    if (ballYValue <= 0) {
-      *ballYvelocity = ballSpeed;
-    }
+  // ball collision for UP and DOWN
+  if (ballYValue <= 0) {
+    *ballYvelocity = ballSpeed;
+  }
 
-    if (ballYValue + BALL_SIZE >= WINDOW_HEIGHT) {
-      *ballYvelocity = -ballSpeed;
-    }
+  if (ballYValue + BALL_SIZE >= WINDOW_HEIGHT) {
+    *ballYvelocity = -ballSpeed;
+  }
 
-    // ball collision for LEFT and RIGHT
-    if (ballXValue <= 0) {
-      ballReset(&currentGameState->ball);
-      currentGameState->players[1].score++;
-    }
-    if (ballXValue + BALL_SIZE >= WINDOW_WIDTH) {
-      ballReset(&currentGameState->ball);
-      currentGameState->players[0].score++;
-    }
+  // ball collision for LEFT and RIGHT
+  if (ballXValue <= 0) {
+    ballReset(&currentGameState->ball);
+    currentGameState->players[1].score++;
+  }
+  if (ballXValue + BALL_SIZE >= WINDOW_WIDTH) {
+    ballReset(&currentGameState->ball);
+    currentGameState->players[0].score++;
+  }
 #pragma omp parallel for
-    for (int i = 0; i < 2; i++) {
-      if (checkPaddleCollision(currentGameState, i)) {
-        ballSpeedIncrement(&currentGameState->ball);
-        bounceBall(currentGameState, i);
-      }
+  for (int i = 0; i < 2; i++) {
+    if (checkPaddleCollision(currentGameState, i)) {
+      ballSpeedIncrement(&currentGameState->ball);
+      bounceBall(currentGameState, i);
     }
-  // }
+  }
 }
 
 void botMovement(gameState *currentGameState) {

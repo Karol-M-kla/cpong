@@ -1,7 +1,6 @@
 #ifndef PARAMETERS_H
 #define PARAMETERS_H
 
-
 #define WINDOW_WIDTH 1280
 #define WINDOW_HEIGHT 720
 #define PADDLE_HEIGHT (WINDOW_HEIGHT / 6.0)
@@ -10,6 +9,5 @@
 #define DEFAULT_BALL_SPEED 1.0f
 #define BALL_SPEED_CHANGE 0.08f
 #define PLAYER_VELOCITY_DELTA 2.0f
-
 
 #endif // PARAMETERS_H

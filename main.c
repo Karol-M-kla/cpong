@@ -42,11 +42,6 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
     SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
     return SDL_APP_FAILURE;
   }
-  // Enable VSync
-  // if (SDL_SetRenderVSync(renderer, 1) == false) {
-  //   SDL_Log("Could not enable VSync! SDL error: %s\n", SDL_GetError());
-  //   return SDL_APP_FAILURE;
-  // }
   initGame(&currentGameState);
 
   return SDL_APP_CONTINUE; /* carry on with the program! */
@@ -62,20 +57,11 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
     if (event->key.key == SDLK_K || event->key.key == SDLK_UP) {
       currentGameState.players[1].velocityY = -PLAYER_VELOCITY_DELTA;
     }
-
-    // // right player
-    // if (event->key.key == SDLK_J || event->key.key == SDLK_DOWN) {
-    //   currentGameState.players[0].velocityY = PLAYER_VELOCITY_DELTA;
-    // }
-    // if (event->key.key == SDLK_K || event->key.key == SDLK_UP) {
-    //   currentGameState.players[0].velocityY = -PLAYER_VELOCITY_DELTA;
-    // }
   }
   if (event->type == SDL_EVENT_KEY_UP) {
     if (event->key.key == SDLK_J || event->key.key == SDLK_DOWN ||
         event->key.key == SDLK_K || event->key.key == SDLK_UP) {
       currentGameState.players[1].velocityY = 0;
-      // currentGameState.players[0].velocityY = 0;
     }
   }
 
@@ -104,10 +90,8 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   SDL_RenderFillRect(renderer, &currentGameState.ball.ballRect);
 
   SDL_SetRenderScale(renderer, 4.0f, 4.0f);
-  // SDL_RenderDebugText(renderer, 5, 5,
-  // "HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-  SDL_RenderDebugTextFormat(renderer, 140.f, 10.f,
-                            "%i : %i", currentGameState.players[0].score,
+  SDL_RenderDebugTextFormat(renderer, 140.f, 10.f, "%i : %i",
+                            currentGameState.players[0].score,
                             currentGameState.players[1].score);
 
   SDL_SetRenderScale(renderer, 1.0f, 1.0f);
