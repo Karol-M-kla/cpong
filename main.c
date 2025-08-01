@@ -9,6 +9,7 @@
 
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_keycode.h>
+#include <SDL3/SDL_oldnames.h>
 #include <SDL3/SDL_timer.h>
 #define SDL_MAIN_USE_CALLBACKS 1 /* use the callbacks instead of main() */
 #include "logic.h"
@@ -62,19 +63,19 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
       currentGameState.players[1].velocityY = -PLAYER_VELOCITY_DELTA;
     }
 
-    // right player
-    if (event->key.key == SDLK_J || event->key.key == SDLK_DOWN) {
-      currentGameState.players[0].velocityY = PLAYER_VELOCITY_DELTA;
-    }
-    if (event->key.key == SDLK_K || event->key.key == SDLK_UP) {
-      currentGameState.players[0].velocityY = -PLAYER_VELOCITY_DELTA;
-    }
+    // // right player
+    // if (event->key.key == SDLK_J || event->key.key == SDLK_DOWN) {
+    //   currentGameState.players[0].velocityY = PLAYER_VELOCITY_DELTA;
+    // }
+    // if (event->key.key == SDLK_K || event->key.key == SDLK_UP) {
+    //   currentGameState.players[0].velocityY = -PLAYER_VELOCITY_DELTA;
+    // }
   }
   if (event->type == SDL_EVENT_KEY_UP) {
     if (event->key.key == SDLK_J || event->key.key == SDLK_DOWN ||
         event->key.key == SDLK_K || event->key.key == SDLK_UP) {
       currentGameState.players[1].velocityY = 0;
-      currentGameState.players[0].velocityY = 0;
+      // currentGameState.players[0].velocityY = 0;
     }
   }
 
@@ -95,14 +96,25 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   SDL_RenderClear(renderer);
 
   SDL_SetRenderDrawColorFloat(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE_FLOAT);
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+
   for (int i = 0; i < 2; i++) {
     SDL_RenderFillRect(renderer, &currentGameState.players[i].paddle);
   }
   SDL_RenderFillRect(renderer, &currentGameState.ball.ballRect);
 
+  SDL_SetRenderScale(renderer, 4.0f, 4.0f);
+  // SDL_RenderDebugText(renderer, 5, 5,
+  // "HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+  SDL_RenderDebugTextFormat(renderer, 140.f, 10.f,
+                            "%i : %i", currentGameState.players[0].score,
+                            currentGameState.players[1].score);
+
+  SDL_SetRenderScale(renderer, 1.0f, 1.0f);
   /* put the newly-cleared rendering on the screen. */
   SDL_RenderPresent(renderer);
 
+  botMovement(&currentGameState);
   moveObjects(&currentGameState);
   detectCollision(&currentGameState);
   SDL_Delay(1000 / 60);
