@@ -15,6 +15,7 @@ typedef struct {
 typedef struct {
 	float velocityX;
 	float velocityY;
+	float speed;
 	SDL_FRect ballRect;
 } Ball;
 
@@ -23,8 +24,11 @@ typedef struct {
 	Ball ball;
 } gameState;
 
+void ballReset(Ball *gameBall);
 void initGame(gameState *currentGameState);
 void moveObjects(gameState *currentGameState);
+float computeBounceAngle(float paddleY, float ballY);
+void bounceBall(gameState *currentGameState, int player);
 bool checkPaddleCollision(gameState *currentGameState, int player);
 void detectCollision(gameState *currentGameState);
 

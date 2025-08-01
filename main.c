@@ -7,7 +7,9 @@
  * This code is public domain. Feel free to use it for any purpose!
  */
 
+#include <SDL3/SDL_init.h>
 #include <SDL3/SDL_keycode.h>
+#include <SDL3/SDL_timer.h>
 #define SDL_MAIN_USE_CALLBACKS 1 /* use the callbacks instead of main() */
 #include "logic.h"
 #include "parameters.h"
@@ -39,7 +41,11 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
     SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
     return SDL_APP_FAILURE;
   }
-
+  // Enable VSync
+  // if (SDL_SetRenderVSync(renderer, 1) == false) {
+  //   SDL_Log("Could not enable VSync! SDL error: %s\n", SDL_GetError());
+  //   return SDL_APP_FAILURE;
+  // }
   initGame(&currentGameState);
 
   return SDL_APP_CONTINUE; /* carry on with the program! */
@@ -56,8 +62,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
       currentGameState.players[1].velocityY = -PLAYER_VELOCITY_DELTA;
     }
 
-
-		// right player 
+    // right player
     if (event->key.key == SDLK_J || event->key.key == SDLK_DOWN) {
       currentGameState.players[0].velocityY = PLAYER_VELOCITY_DELTA;
     }
@@ -98,9 +103,9 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   /* put the newly-cleared rendering on the screen. */
   SDL_RenderPresent(renderer);
 
-  detectCollision(&currentGameState);
   moveObjects(&currentGameState);
-
+  detectCollision(&currentGameState);
+  SDL_Delay(1000 / 60);
   return SDL_APP_CONTINUE; /* carry on with the program! */
 }
 
